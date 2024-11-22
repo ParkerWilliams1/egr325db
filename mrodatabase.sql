@@ -30,7 +30,7 @@ CREATE TABLE Inventory (
 
 -- Order table represents actual orders made by the customer. 
 -- Tracks the details of an order and connects to a customer and order status. 
-CREATE TABLE `Order` (
+CREATE TABLE CustomerOrder (
     order_id INT AUTO_INCREMENT PRIMARY KEY,
     customer_id INT,
     order_status_id INT,
@@ -62,7 +62,7 @@ CREATE TABLE OrderItem (
     menu_id INT,
     size VARCHAR(50) NOT NULL, -- items must have a specified size.
     quantity INT DEFAULT 1 CHECK(quantity > 0),    -- cannot have a negative quantity. 
-    FOREIGN KEY (order_id) REFERENCES `Order`(order_id) ON DELETE CASCADE, -- delete if the order is deleted. 
+    FOREIGN KEY (order_id) REFERENCES CustomerOrder(order_id) ON DELETE CASCADE, -- delete if the order is deleted. 
     FOREIGN KEY (menu_id) REFERENCES MenuItem(menu_item_id) ON DELETE RESTRICT -- prevents the deletion of referenced menu item.
 );
 
