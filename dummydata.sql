@@ -52,7 +52,7 @@ VALUES
 ('Seafood Pizza', 19.99, 8, 5);       -- Anchovies
 
 -- dummy data into Order table
-INSERT INTO `Order` (customer_id, order_status_id, delivery_address, total_amount, delivery_type)
+INSERT INTO CustomerOrder (customer_id, order_status_id, delivery_address, total_amount, delivery_type)
 VALUES
 (1, 1, '123 Elm St', 25.98, 'delivery'),
 (2, 2, '456 Oak St', 30.98, 'pickup'),
