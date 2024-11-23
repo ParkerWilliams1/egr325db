@@ -1,111 +1,106 @@
+USE MRO;
+-- Populate Customer table
+INSERT INTO Customer (customer_name, email_address, phone_number, address) VALUES
+('John Doe', 'john.doe@example.com', '1234567890', '123 Main Street'),
+('Jane Smith', 'jane.smith@example.com', '0987654321', NULL),
+('Bob Brown', 'bob.brown@example.com', '5551234567', '456 Elm Street'),
+('Alice Green', 'alice.green@example.com', '7778889999', '789 Oak Lane'),
+('Michael Johnson', 'michael.johnson@example.com', '6665554444', NULL),
+('Emily Davis', 'emily.davis@example.com', '1112223333', '321 Pine Avenue');
 
-use mro; 
-
--- dummy customer data
-INSERT INTO Customer(customer_name, email_address, phone_number, address)
-VALUES 
-('John Doe', 'john.doe@example.com', '1234567890', '123 Elm St'),
-('Jane Smith', 'jane.smith@example.com', '9876543210', '456 Oak St'),
-('Tom Brown', 'tom.brown@example.com', '5555555555', NULL),
-('Alice Green', 'alice.green@example.com', '1112223333', '789 Pine St'),
-('Bob White', 'bob.white@example.com', '4445556666', '101 Maple Ave'),
-('Charlie Blue', 'charlie.blue@example.com', '7778889999', NULL),   
-('David Black', 'david.black@example.com', '2223334444', '202 Birch Blvd'),
-('Eva Purple', 'eva.purple@example.com', '3334445555', '303 Cedar Rd');
-
-
--- dummy data into OrderStatus table
-INSERT INTO OrderStatus (status_name)
-VALUES
+-- Populate OrderStatus table
+INSERT INTO OrderStatus (status_name) VALUES
 ('Received'),
 ('In Progress'),
 ('Completed'),
-('Cancelled');
+('Cancelled'),
+('Delivered'),
+('Refunded');
 
--- dummy data into Inventory table
-INSERT INTO Inventory (ingredient_name, quantity)
-VALUES
-('Tomato', 100),
-('Cheese', 200),
-('Olives', 50),
-('Pepperoni', 75),
-('Basil', 30),
-('Mushrooms', 60),
-('Green Peppers', 80),
+-- Populate Inventory table
+INSERT INTO Inventory (ingredient_name, quantity) VALUES
+('Cheese', 100),
+('Tomato Sauce', 80),
+('Pepperoni', 60),
+('Dough', 200),
 ('Onions', 40),
-('Anchovies', 20),
-('Chicken', 50),
-('Ham', 60);
+('Bell Peppers', 30),
+('Mushrooms', 25),
+('Sausage', 50);
 
- -- dummy data into MenuItem table
-INSERT INTO MenuItem (menu_item_name, price, ingredient_id, quantity_needed)
-VALUES
-('Margherita Pizza', 12.99, 1, 2),  -- Tomato
-('Pepperoni Pizza', 15.99, 2, 3),   -- Cheese
-('Veggie Pizza', 14.99, 3, 2),      -- Olives
-('Meat Lovers Pizza', 17.99, 4, 4), -- Pepperoni
-('Pesto Pizza', 13.99, 5, 1),      -- Basil
-('Mushroom Pizza', 13.49, 6, 3),    -- Mushrooms
-('Veggie Supreme Pizza', 16.99, 3, 5),  -- Olives, Green Peppers
-('BBQ Chicken Pizza', 18.49, 6, 4),   -- Chicken
-('Hawaiian Pizza', 15.49, 7, 3),      -- Ham
-('Seafood Pizza', 19.99, 8, 5);       -- Anchovies
+-- Populate Employee table
+INSERT INTO Employee (employee_name, email_address, phone_number, hire_date, role, wage) VALUES
+('Alice Johnson', 'alice.johnson@example.com', '2223334444', '2023-01-01', 'Manager', 25.00),
+('Charlie Davis', 'charlie.davis@example.com', '3334445555', '2023-02-15', 'Employee', 15.00),
+('Emily White', 'emily.white@example.com', '4445556666', '2023-03-10', 'Employee', 15.50),
+('David Harris', 'david.harris@example.com', '9998887777', '2023-04-20', 'Employee', 16.00),
+('Olivia Brown', 'olivia.brown@example.com', '5556667777', '2023-05-10', 'Employee', 14.50);
 
--- dummy data into Order table
-INSERT INTO CustomerOrder (customer_id, order_status_id, delivery_address, total_amount, delivery_type)
-VALUES
-(1, 1, '123 Elm St', 25.98, 'delivery'),
-(2, 2, '456 Oak St', 30.98, 'pickup'),
-(3, 3, NULL, 14.99, 'pickup'),
-(4, 1, '202 Birch Blvd', 35.98, 'delivery'),
-(5, 2, '303 Cedar Rd', 50.98, 'pickup'),
-(1, 3, '123 Elm St', 40.98, 'delivery'),
-(2, 4, '456 Oak St', 25.99, 'pickup'),
-(3, 1, NULL, 17.99, 'pickup');
+-- Populate CustomerOrder table
+INSERT INTO CustomerOrder (customer_id, order_status_id, employee_id, delivery_address, total_amount, delivery_type) VALUES
+(1, 1, 2, '123 Main Street', 25.50, 'delivery'),
+(2, 2, 3, NULL, 15.00, 'pickup'),
+(3, 3, 2, '456 Elm Street', 30.75, 'delivery'),
+(4, 4, 4, '789 Oak Lane', 18.50, 'delivery'),
+(5, 5, 5, NULL, 22.00, 'pickup'),
+(6, 6, 3, '321 Pine Avenue', 27.00, 'delivery');
 
--- dummy data into OrderItem table
-INSERT INTO OrderItem (order_id, menu_id, size, quantity)
-VALUES
-(1, 1, 'Large', 2),
-(1, 2, 'Medium', 1),
-(2, 3, 'Small', 1),
-(2, 4, 'Large', 1),
+-- Populate MenuItem table
+INSERT INTO MenuItem (menu_item_name, price, ingredient_id, quantity_needed) VALUES
+('Pepperoni Pizza', 12.00, 3, 2),
+('Cheese Pizza', 10.00, 1, 3),
+('Veggie Pizza', 11.50, 5, 2),
+('Meat Lover\'s Pizza', 14.00, 8, 4),
+('Supreme Pizza', 15.50, 6, 3),
+('Hawaiian Pizza', 13.50, 4, 2);
+
+-- Populate OrderItem table
+INSERT INTO OrderItem (order_id, menu_id, size, quantity) VALUES
+(1, 1, 'Medium', 2),
+(1, 2, 'Large', 1),
+(2, 3, 'Small', 3),
+(2, 4, 'Large', 2),
 (3, 5, 'Medium', 1),
-(4, 6, 'Large', 2),  -- 2 Mushroom Pizzas
-(5, 3, 'Medium', 1),  -- 1 Veggie Supreme Pizza
-(1, 7, 'Large', 2),   -- 2 Hawaiian Pizzas
-(2, 8, 'Small', 1),   -- 1 Seafood Pizza
-(3, 5, 'Medium', 1);  -- 1 BBQ Chicken Pizza
+(3, 6, 'Large', 3),
+(4, 1, 'Small', 2),
+(5, 2, 'Large', 1),
+(6, 4, 'Medium', 3);
 
--- dummy data into InventoryTransaction table
-INSERT INTO InventoryTransaction (ingredient_id, quantity_change, transaction_type)
-VALUES
-(1, -5, 'usage'),  -- Tomato usage
-(2, -10, 'usage'), -- Cheese usage
-(3, -3, 'usage'),  -- Olives usage
-(4, -5, 'usage'),  -- Pepperoni usage
-(5, -2, 'usage'),  -- Basil usage
-(1, 20, 'restock'), -- Restock Tomato
-(2, 50, 'restock'), -- Restock Cheese
-(6, -6, 'usage'),  -- Mushrooms usage for Mushroom Pizza
-(3, -10, 'usage'), -- Olives usage for Veggie Supreme Pizza
-(7, -6, 'usage'),  -- Ham usage for Hawaiian Pizza
-(8, -5, 'usage'),  -- Anchovies usage for Seafood Pizza
-(6, -4, 'usage'),  -- Chicken usage for BBQ Chicken Pizza
-(6, 30, 'restock'), -- Restock Mushrooms
-(3, 20, 'restock'), -- Restock Olives
-(7, 50, 'restock'); -- Restock Ham
+-- Populate InventoryTransaction table
+INSERT INTO InventoryTransaction (ingredient_id, quantity_change, transaction_type) VALUES
+(1, -5, 'usage'),
+(2, 10, 'restock'),
+(3, -3, 'usage'),
+(4, -10, 'usage'),
+(5, 5, 'restock'),
+(6, -8, 'usage'),
+(7, 15, 'restock'),
+(8, -12, 'usage');
 
--- dummy data into MenuIngredient table
-INSERT INTO MenuIngredient (menu_id, ingredient_id, quantity_needed)
-VALUES
-(1, 1, 2),  -- Margherita Pizza uses 2 Tomatoes
-(2, 2, 3),  -- Pepperoni Pizza uses 3 Cheese
-(3, 3, 2),  -- Veggie Pizza uses 2 Olives
-(4, 4, 4),  -- Meat Lovers Pizza uses 4 Pepperonis
-(5, 5, 1),  -- Pesto Pizza uses 1 Basil
-(6, 6, 3),  -- Mushroom Pizza uses 3 Mushrooms
-(3, 3, 2),  -- Veggie Supreme Pizza uses 2 Olives
-(7, 7, 3),  -- Hawaiian Pizza uses 3 Ham
-(8, 8, 5),  -- Seafood Pizza uses 5 Anchovies
-(5, 6, 4);  -- BBQ Chicken Pizza uses 4 Chicken
+-- Populate MenuIngredient table
+INSERT INTO MenuIngredient (menu_id, ingredient_id, quantity_needed) VALUES
+(1, 3, 2),
+(1, 4, 1),
+(2, 1, 3),
+(2, 2, 2),
+(3, 5, 1),
+(3, 6, 1),
+(4, 8, 3),
+(5, 7, 2);
+
+-- Populate Shift table
+INSERT INTO Shift (shift_date, start_time, end_time, employee_id) VALUES
+('2024-11-22', '09:00:00', '13:00:00', 2),
+('2024-11-22', '14:00:00', '18:00:00', 3),
+('2024-11-23', '10:00:00', '14:00:00', 2),
+('2024-11-23', '15:00:00', '19:00:00', 4),
+('2024-11-24', '08:00:00', '12:00:00', 5);
+
+-- Populate Payment table
+INSERT INTO Payment (order_id, payment_date, payment_amount, payment_method) VALUES
+(1, '2024-11-22', 25.50, 'Card'),
+(2, '2024-11-22', 15.00, 'Cash'),
+(3, '2024-11-22', 30.75, 'Online'),
+(4, '2024-11-23', 18.50, 'Card'),
+(5, '2024-11-23', 22.00, 'Cash'),
+(6, '2024-11-24', 27.00, 'Online');
