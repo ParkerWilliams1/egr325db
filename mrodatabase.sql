@@ -1,89 +1,133 @@
 CREATE DATABASE MRO; 
 USE MRO;
 
--- Customer table to store customer information. 
--- Helps manage orders and keeps a record of customers. 
+-- Table: Customer
+-- stores information about customers.
+-- helps track customer details and facilitates order management.
 CREATE TABLE Customer (
-    customer_id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_name VARCHAR(100) NOT NULL,
-    email_address VARCHAR(150) NOT NULL UNIQUE,   -- each customer must have a unique email. 
-    phone_number VARCHAR(10) NOT NULL CHECK (LENGTH(phone_number) = 10), -- Must be a 10 digit number. 
-    address VARCHAR(255)    -- NULL if the customer is pick-up. 
+    customer_id INT AUTO_INCREMENT PRIMARY KEY, -- unqiue ID for each customer.
+    customer_name VARCHAR(100) NOT NULL,        -- customer's full name.
+    email_address VARCHAR(150) NOT NULL UNIQUE, -- email must be unique for identification.
+    phone_number VARCHAR(10) NOT NULL CHECK (LENGTH(phone_number) = 10), -- phone number must be 10 digits..
+    address VARCHAR(255)    -- address for delivery orders. NULL for pickup orders.
 );
 
--- Order status table to store different statuses for orders. 
--- Helps that the order status is consistent across many orders. 
--- Easy updates without changing the main order table.
+-- Table: OrderStatus
+-- defines the various statuses an order can have.
+-- helps ensure consistent order status values across all orders.
 CREATE TABLE OrderStatus (
-    status_id INT AUTO_INCREMENT PRIMARY KEY,
-    status_name VARCHAR(50) NOT NULL UNIQUE    -- no duplicate status names
+    status_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each status.
+    status_name VARCHAR(50) NOT NULL UNIQUE   -- status name, e.g., 'Received', 'Completed','Canceled'.
 );
 
--- Inventory Table to track the ingredients that are available and in stock. 
--- Manages ingredients needed to prepare items. 
--- Enables the calculation of how much each ingredient is used in orders & stock levels.
+-- Table: Inventory
+-- table tracks the ingredients available in stock.
+-- helps manage inventory levels and calculate ingredient usage.
 CREATE TABLE Inventory (
-    ingredient_id INT AUTO_INCREMENT PRIMARY KEY,
-    ingredient_name VARCHAR(100) NOT NULL UNIQUE, -- unique ingredient names 
-    quantity INT DEFAULT 0 CHECK (quantity >= 0) -- quantity cannot be negative
+    ingredient_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each ingredient.
+    ingredient_name VARCHAR(100) NOT NULL UNIQUE, -- must have unique ingredient names. 
+    quantity INT DEFAULT 0 CHECK (quantity >= 0)  -- current stock level, must be non-negative.
 );
 
--- Order table represents actual orders made by the customer. 
--- Tracks the details of an order and connects to a customer and order status. 
+-- Table: Employee
+--  table stores information about employees.
+-- employees can take orders, prepare food, or make deliveries.
+CREATE TABLE Employee (
+    employee_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each employee.
+    employee_name VARCHAR(100) NOT NULL,        -- full name of the employee.
+    email_address VARCHAR(150) UNIQUE,          -- email address is optional butmust be unique if present.
+    phone_number VARCHAR(10) NOT NULL CHECK (LENGTH(phone_number) = 10), -- 10-digit phone number.
+    hire_date DATE NOT NULL,                    -- date the employee was hired.
+    role ENUM('Manager', 'Employee') NOT NULL,  -- employee role, either 'Manager' or 'Employee' (all take and make orders + deliver).
+    wage DECIMAL(10, 2) NOT NULL CHECK (wage >= 0) -- hourly wage, must be non-negative.
+);
+
+-- Table: CustomerOrder
+-- table represents customer orders.
+-- tracks details of each order, including customer, status, and employee assigned.
 CREATE TABLE CustomerOrder (
-    order_id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT,
-    order_status_id INT,
-    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,    -- time of order
-    delivery_address VARCHAR(255), -- null if the customer is pickup.      
-    total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0), -- total amount cannot be negative. 
-    delivery_type ENUM('delivery', 'pickup') NOT NULL, -- customer order is either a delviery or a pick-up. 
-    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE CASCADE, -- delete the if the customer is removed 
-    FOREIGN KEY (order_status_id) REFERENCES OrderStatus(status_id) ON DELETE RESTRICT  -- prevents deletion of referenced status
+    order_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each order.
+    customer_id INT,                         -- ID of the customer who placed the order.
+    order_status_id INT,                     -- status ID of the order (e.g., 'Completed' or 'Cancelled').
+    employee_id INT,                         -- employee handling the order.
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- timestamp when the order was placed.
+    delivery_address VARCHAR(255),          -- delivery address. NULL for pickup orders.
+    total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0), -- total price of the order.
+    delivery_type ENUM('delivery', 'pickup') NOT NULL, -- type of order: delivery or pickup.
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE CASCADE, -- cascade delete if customer is removed.
+    FOREIGN KEY (order_status_id) REFERENCES OrderStatus(status_id) ON DELETE RESTRICT, -- prevents status deletion if referenced.
+    FOREIGN KEY (employee_id) REFERENCES Employee(employee_id) -- link to handling employee.
 );
 
--- MenuItem table consists of the menu items the customer can order. 
--- Tracks which ingredients are used in each item. 
--- Lets us manage the different menu items offered by the pizzeria. 
+-- Table: MenuItem
+-- table represents the items on the menu.
+-- tracks the price and required ingredients for each menu item.
 CREATE TABLE MenuItem (
-    menu_item_id INT AUTO_INCREMENT PRIMARY KEY,
-    menu_item_name VARCHAR(100) NOT NULL UNIQUE, -- avoid duplicate menu item names
-    price DECIMAL(10, 2) NOT NULL CHECK(price >= 0),    -- must contain a price that is non-negative.
-    ingredient_id INT,  
-    quantity_needed INT CHECK(quantity_needed > 0), -- quantity needed must be positive.  
-    FOREIGN KEY (ingredient_id) REFERENCES Inventory(ingredient_id) ON DELETE SET NULL -- set the ingredient_id to null if an inventory item is deleted.
+    menu_item_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each menu item.
+    menu_item_name VARCHAR(100) NOT NULL UNIQUE, -- name of the menu item (e.g., 'Cheese Pizza').
+    price DECIMAL(10, 2) NOT NULL CHECK(price >= 0), -- price of the menu item.
+    ingredient_id INT,                            -- main ingredient ID (optional).
+    quantity_needed INT CHECK(quantity_needed > 0), -- quantity of the main ingredient needed.
+    FOREIGN KEY (ingredient_id) REFERENCES Inventory(ingredient_id) ON DELETE SET NULL -- nulled if ingredient deleted.
 );
 
--- OrderItem Table tracks individual items within the order. 
--- Links to the main order with given quantites and sizes. 
+-- Table: OrderItem
+-- table tracks individual items in a customer's order.
+-- links a menu item to an order, including size and quantity.
 CREATE TABLE OrderItem (
-    order_item_id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT,
-    menu_id INT,
-    size VARCHAR(50) NOT NULL, -- items must have a specified size.
-    quantity INT DEFAULT 1 CHECK(quantity > 0),    -- cannot have a negative quantity. 
-    FOREIGN KEY (order_id) REFERENCES CustomerOrder(order_id) ON DELETE CASCADE, -- delete if the order is deleted. 
-    FOREIGN KEY (menu_id) REFERENCES MenuItem(menu_item_id) ON DELETE RESTRICT -- prevents the deletion of referenced menu item.
+    order_item_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each item in the order.
+    order_id INT,                                -- order to which the item belongs.
+    menu_id INT,                                 -- menu item being ordered.
+    size VARCHAR(50) NOT NULL,                   -- size of the item (e.g., 'Small', 'Large').
+    quantity INT DEFAULT 1 CHECK(quantity > 0),  -- number of items ordered, must be positive.
+    FOREIGN KEY (order_id) REFERENCES CustomerOrder(order_id) ON DELETE CASCADE, -- delete items if order deleted.
+    FOREIGN KEY (menu_id) REFERENCES MenuItem(menu_item_id) ON DELETE RESTRICT  -- prevent deletion of referenced menu.
 );
 
--- Inventory Transaction table to track inventory changes (when ingredients are used or restocked). 
--- Helps maintain accurate stock levels.
+-- Table: InventoryTransaction
+-- table records changes to inventory levels.
+-- tracks restocking or usage of ingredients.
 CREATE TABLE InventoryTransaction (
-    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
-    ingredient_id INT,
-    quantity_change INT,  -- Positive for restocking, negative for usage
-    transaction_type ENUM('restock', 'usage') NOT NULL, -- must have transaction type.
-    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- time of transaction 
-    FOREIGN KEY (ingredient_id) REFERENCES Inventory(ingredient_id) ON DELETE CASCADE -- delete if ingredient is deleted
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each transaction.
+    ingredient_id INT,                              -- ingredient being restocked or used.
+    quantity_change INT,                            -- positive for restock, negative for usage.
+    transaction_type ENUM('restock', 'usage') NOT NULL, -- type of transaction.
+    transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- time the transaction occurred.
+    FOREIGN KEY (ingredient_id) REFERENCES Inventory(ingredient_id) ON DELETE CASCADE -- cascade delete if ingredient removed.
 );
 
--- MenuIngredient Table tracks the relationship with menu items and ingredients. 
--- Flexible tracking of the ingredients needed for each menu item.
--- Helps calculating how much inventory will be used when a customer orders an item. 
+-- Table: MenuIngredient
+-- tracks the relationship between menu items and their ingredients.
+-- helps calculate inventory usage for each menu item ordered.
 CREATE TABLE MenuIngredient (
-    menu_ingredient_id INT AUTO_INCREMENT PRIMARY KEY,
-    menu_id INT NOT NULL,
-    ingredient_id INT NOT NULL,
-    quantity_needed INT NOT NULL CHECK (quantity_needed > 0),  -- quantity needed must be positive.
-    FOREIGN KEY (ingredient_id) REFERENCES Inventory(ingredient_id) ON DELETE CASCADE -- delete if an ingredient is deleted. 
+    menu_ingredient_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each entry.
+    menu_id INT NOT NULL,                              -- menu item ID.
+    ingredient_id INT NOT NULL,                        -- ingredient ID.
+    quantity_needed INT NOT NULL CHECK (quantity_needed > 0), -- quantity of ingredient required.
+    FOREIGN KEY (menu_id) REFERENCES MenuItem(menu_item_id), -- link to the menu item.
+    FOREIGN KEY (ingredient_id) REFERENCES Inventory(ingredient_id) ON DELETE CASCADE -- cascade delete if ingredient removed.
 );
+
+-- Table: Shift
+-- tracks employee shifts and schedules.
+CREATE TABLE Shift (
+    shift_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each shift.
+    shift_date DATE NOT NULL,                -- date of the shift.
+    start_time TIME NOT NULL,                -- shift start time.
+    end_time TIME NOT NULL,                  -- shift end time.
+    employee_id INT NOT NULL,                -- employee assigned to the shift.
+    FOREIGN KEY (employee_id) REFERENCES Employee(employee_id) ON DELETE CASCADE, -- Cascade delete if employee removed.
+    CHECK (start_time < end_time)            -- ensure shift start time is before end time.
+);
+
+-- Table: Payment
+-- tracks payment details for customer orders.
+CREATE TABLE Payment (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each payment.
+    order_id INT NOT NULL,                     -- associated order ID.
+    payment_date DATE NOT NULL,                -- date of payment.
+    payment_amount DECIMAL(10, 2) NOT NULL CHECK (payment_amount >= 0), -- payment amount.
+    payment_method ENUM('Cash', 'Card', 'Online') NOT NULL, -- payment method used.
+    FOREIGN KEY (order_id) REFERENCES CustomerOrder(order_id) ON DELETE CASCADE, -- cascade delete if order removed.
+    UNIQUE (order_id)	-- ensure one payment per order.
+);   
