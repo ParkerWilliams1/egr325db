@@ -54,7 +54,7 @@ CREATE TABLE CustomerOrder (
     delivery_address VARCHAR(255),          -- delivery address. NULL for pickup orders.
     total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0), -- total price of the order.
     delivery_type ENUM('delivery', 'pickup') NOT NULL, -- type of order: delivery or pickup.
-    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE RESTRICT, -- prevent deletion of customer if order exists.
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE RESTRICT, -- prevent deletion of customer if ordre exists.
     FOREIGN KEY (order_status_id) REFERENCES OrderStatus(status_id) ON DELETE RESTRICT, -- prevents status deletion if referenced.
     FOREIGN KEY (employee_id) REFERENCES Employee(employee_id) ON DELETE SET NULL -- link to handling employee.
 );
@@ -78,7 +78,7 @@ CREATE TABLE OrderItem (
     order_item_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each item in the order.
     order_id INT NOT NULL,                                -- order to which the item belongs.
     menu_id INT NOT NULL,                                 -- menu item being ordered.
-    size VARCHAR(50) NOT NULL,                   -- size of the item (e.g., 'Small', 'Large').
+    size ENUM('Small','Medium','Large','X-Large') NOT NULL,                   -- size of the item (e.g., 'Small', 'Large').
     quantity INT DEFAULT 1 CHECK(quantity > 0),  -- number of items ordered, must be positive.
     FOREIGN KEY (order_id) REFERENCES CustomerOrder(order_id) ON DELETE CASCADE, -- delete items if order deleted.
     FOREIGN KEY (menu_id) REFERENCES MenuItem(menu_item_id) ON DELETE RESTRICT  -- prevent deletion of referenced menu.
@@ -130,4 +130,4 @@ CREATE TABLE Payment (
     payment_method ENUM('Cash', 'Card', 'Online') NOT NULL, -- payment method used.
     FOREIGN KEY (order_id) REFERENCES CustomerOrder(order_id) ON DELETE CASCADE, -- cascade delete if order removed.
     UNIQUE (order_id)	-- ensure one payment per order.
-);  
+); 
