@@ -1,5 +1,6 @@
--- User story deomonstrations 
+-- User story demonstrations 
 
+-- USER STORY 1  
 -- As a customer, I want to order a delivery online
 -- so that I can enjoy my meal at my own home.
 
@@ -28,3 +29,24 @@
 
 -- -- OrderSummary view to view complete order information
 -- SELECT * FROM OrderSummary WHERE CustomerName = 'John Doe';
+
+-- USER STORY 2
+-- As a customer I want to view my order status so I can 
+-- easily adjust my routine to the order. 
+
+-- view all orders for a customer 
+-- SELECT 	
+-- 	o.order_id AS OrderID,
+--     o.order_date AS OrderDate,
+--     os.status_name AS OrderStatus,
+--     o.delivery_type AS DeliveryType,
+--     o.delivery_address AS DeliveryAddress,
+--     o.total_amount AS TotalAmount
+-- FROM 
+-- 	CustomerOrder o
+-- JOIN 
+-- 	OrderStatus os ON o.order_status_id = os.status_id
+-- WHERE
+-- 	o.customer_id = 1 -- replace 1 with the customers ID. 
+-- ORDER BY 
+-- 	o.order_date DESC;
