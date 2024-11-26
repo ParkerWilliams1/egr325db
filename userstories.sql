@@ -77,3 +77,9 @@ inventory so that I can prevent supply from running out. */
 -- 	Inventory; 
         
 -- SELECT * FROM InventorySummary; 
+
+/* As a manager, I want to see the menu items that need to be restocked 
+so that I can order the correct items. */
+
+-- use the InventorySummary view and filter to view Low Stock status. 
+-- SELECT * FROM InventorySummary WHERE StockStatus = 'Low Stock';
