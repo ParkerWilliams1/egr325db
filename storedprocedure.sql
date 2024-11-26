@@ -1,3 +1,5 @@
+-- stored procedure to add new order, check availability of ingredients, 
+-- adjust the inventory levels, and insert the order into the database.
 DELIMITER //
 
 CREATE PROCEDURE AddNewOrder (
@@ -64,41 +66,69 @@ END //
 
 DELIMITER ;
 
--- uses the procedure to add a new order.
-CALL AddNewOrder (
-	1, -- customer id
-    2, -- employee_id
-    1, -- 'Recieved' order status
-    'delivery', -- type of order
-    '123 Main Street', -- address
-    1, -- menu id (pepperoni pizza)
-    3, -- quantity
-    'Large' -- size
-);
+-- -- uses the procedure to add a new order.
+-- CALL AddNewOrder (
+-- 	1, -- customer id
+--     2, -- employee_id
+--     1, -- 'Recieved' order status
+--     'delivery', -- type of order
+--     '123 Main Street', -- address
+--     1, -- menu id (pepperoni pizza)
+--     3, -- quantity
+--     'Large' -- size
+-- );
 
 -- select statements to confirm changes: 
 
--- check new entry for customer order.
-SELECT * FROM CustomerOrder WHERE customer_id = 1 ORDER BY order_id DESC LIMIT 1;
+-- -- check new entry for customer order.
+-- SELECT * FROM CustomerOrder WHERE customer_id = 1 ORDER BY order_id DESC LIMIT 1;
 
--- check new entry in OrderItem.
-SELECT * FROM OrderItem WHERE order_id = (SELECT MAX(order_id) FROM CustomerOrder);
+-- -- check new entry in OrderItem.
+-- SELECT * FROM OrderItem WHERE order_id = (SELECT MAX(order_id) FROM CustomerOrder);
 
--- check inventory for pepperoni (ingredient_id: 3)
-SELECT * FROM Inventory WHERE ingredient_id = 3;
+-- -- check inventory for pepperoni (ingredient_id: 3)
+-- SELECT * FROM Inventory WHERE ingredient_id = 3;
 
--- check inventory for dough (ingredient_id: 4)
-SELECT * FROM Inventory WHERE ingredient_id = 4;
+-- -- check inventory for dough (ingredient_id: 4)
+-- SELECT * FROM Inventory WHERE ingredient_id = 4;
 
 -- uses invalid data for the procedure. 
 -- insufficient inventory error. 
-CALL AddNewOrder(
-    1,
-    2,
-    1,
-    'delivery',
-    '123 Main Street',
-    1,
-    500, -- exceeds stock
-    'Extra Large' 
-);
+-- CALL AddNewOrder(
+--     1,
+--     2,
+--     1,
+--     'delivery',
+--     '123 Main Street',
+--     1,
+--     500, -- exceeds stock
+--     'Extra Large' 
+-- );
+
+-- function to calculate the total cost of an order. 
+DELIMITER //
+
+CREATE FUNCTION CalculateOrderTotal(p_order_id INT)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN 
+	DECLARE v_total DECIMAL(10, 2);
+    
+    -- calculate the total cost by summing up item prices and quantities
+    SELECT SUM(mi.price * oi.quantity)
+    INTO v_total 
+    FROM OrderItem oi
+    JOIN MenuItem mi ON oi.menu_id = mi.menu_item_id
+    WHERE oi.order_id = p_order_id; 
+    
+    -- return the calculated total cost 
+    RETURN IFNULL(v_total, 0);		-- return zero if no items are found. 
+END // 
+
+DELIMITER ;
+
+-- select statement to test changes: 
+
+-- SELECT order_id, CalculateOrderTotal(order_id) AS total_cost
+-- FROM CustomerOrder;
+
