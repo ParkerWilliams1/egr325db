@@ -50,3 +50,12 @@
 -- 	o.customer_id = 1 -- replace 1 with the customers ID. 
 -- ORDER BY 
 -- 	o.order_date DESC;
+
+/* As a customer, I want to view the menu, so that 
+	I know what meals I can pick and order.*/
+-- SELECT 
+--     mi.menu_item_id AS MenuID,
+--     mi.menu_item_name AS ItemName,
+--     mi.price AS Price
+-- FROM 
+--     MenuItem mi;
