@@ -59,3 +59,21 @@
 --     mi.price AS Price
 -- FROM 
 --     MenuItem mi;
+
+/* as a manager, I want to see the inventory quantity in the restaurant 
+inventory so that I can prevent supply from running out. */
+
+-- custom view for the manager to access inventory details easily
+-- CREATE VIEW InventorySummary AS 
+-- SELECT 
+-- 	ingredient_id AS IngredientID, 
+--     ingredient_name AS IngredientName,
+--     quantity AS Quantity,
+-- 	CASE 
+-- 		WHEN quantity < 10 THEN 'Low Stock'
+-- 		ELSE 'Sufficient'
+-- 	END AS StockStatus
+-- FROM 
+-- 	Inventory; 
+        
+-- SELECT * FROM InventorySummary; 
