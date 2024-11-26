@@ -170,3 +170,33 @@ DELIMITER ;
 
 -- INSERT INTO InventoryTransaction (ingredient_id, quantity_change, transaction_type)
 -- VALUES (1, -1000, 'usage'); -- Use more units than available
+
+-- custom view to provide detailed order summaries 
+CREATE VIEW OrderSummary AS 
+SELECT 
+	o.order_id AS OrderID,				-- the ID of the order from CustomerOrder
+    c.customer_name AS CustomerName,	-- name of the customer from Customer table 
+    os.status_name AS OrderStatus, 		-- the status of the order from OrderStatus
+    e.employee_name AS EmployeeName,	-- name of the employee handling the order
+    CalculateOrderTotal(o.order_id) AS TotalAmount, -- total amount of the order
+    o.delivery_type AS DeliveryType,	-- delivery order or pickup from CustomerOrder
+    o.delivery_address AS DeliveryAddress	-- deleivery address of a customer. (NULL if pickup)
+FROM 
+	CustomerOrder o
+-- LEFT JOIN ensures the view still works if some optional fields are NULL
+LEFT JOIN Customer c ON o.customer_id = c.customer_id	
+LEFT JOIN OrderStatus os ON o.order_status_id = os.status_id
+LEFT JOIN Employee e ON o.employee_id = e.employee_id;
+
+-- test the custom view:
+-- retrieve all orders with their details
+-- SELECT * FROM OrderSummary; 
+
+-- orders above a specific amount
+-- SELECT * FROM OrderSummary WHERE TotalAmount > 50;
+
+-- only delivery orders
+-- SELECT * FROM OrderSummary WHERE DeliveryType = 'delivery';
+
+-- orders handles by a specific employee 
+-- SELECT * FROM OrderSummary WHERE EmployeeName = 'Charlie Davis';
