@@ -132,3 +132,41 @@ DELIMITER ;
 -- SELECT order_id, CalculateOrderTotal(order_id) AS total_cost
 -- FROM CustomerOrder;
 
+
+-- trigger to automatically update the Inventory table when a new entry is added to the InventoryTransaction table.
+DELIMITER //
+
+CREATE TRIGGER trg_update_inventory
+AFTER INSERT ON InventoryTransaction
+FOR EACH ROW
+BEGIN 
+	-- check if the transaction is valid
+    IF NEW.transaction_type IN ('restock','usage') THEN
+		UPDATE Inventory
+        SET quantity = quantity + NEW.quantity_change
+        WHERE ingredient_id = NEW.ingredient_id;
+        
+        -- ensure inventory quantity does not go below zero
+        IF (SELECT quantity FROM Inventory WHERE ingredient_id = NEW.ingredient_id) < 0 THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Inventory cannot have a negative quantity.';
+	END IF; 
+	ELSE 
+		-- error message for invalid transaction types
+	        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid Transaction type';
+	END IF;
+END // 
+
+DELIMITER ;
+
+
+-- INSERT INTO InventoryTransaction (ingredient_id, quantity_change, transaction_type)
+-- VALUES (1, 20, 'restock'); -- Restock 20 units of Cheese
+
+-- INSERT INTO InventoryTransaction (ingredient_id, quantity_change, transaction_type)
+-- VALUES (1, -15, 'usage'); -- Use 15 units of Cheese
+
+-- INSERT INTO InventoryTransaction (ingredient_id, quantity_change, transaction_type)
+-- VALUES (1, 10, 'invalid'); -- Invalid transaction type
+
+-- INSERT INTO InventoryTransaction (ingredient_id, quantity_change, transaction_type)
+-- VALUES (1, -1000, 'usage'); -- Use more units than available
