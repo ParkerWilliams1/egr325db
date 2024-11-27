@@ -18,15 +18,15 @@ INSERT INTO OrderStatus (status_name) VALUES
 ('Refunded');
 
 -- Populate Inventory table
-INSERT INTO Inventory (ingredient_name, quantity) VALUES
-('Cheese', 100),
-('Tomato Sauce', 80),
-('Pepperoni', 60),
-('Dough', 200),
-('Onions', 40),
-('Bell Peppers', 30),
-('Mushrooms', 25),
-('Sausage', 50);
+INSERT INTO Inventory (ingredient_name, ingredient_cost, quantity) VALUES
+('Cheese', 4.25 , 100),
+('Tomato Sauce', 3.00, 80),
+('Pepperoni', 4.40, 60),
+('Dough', 2.00, 200),
+('Onions', 1.50, 40),
+('Bell Peppers', 2.50, 30),
+('Mushrooms', 3.50, 25),
+('Sausage', 6.00, 50);
 
 -- Populate Employee table
 INSERT INTO Employee (employee_name, email_address, phone_number, hire_date, role, wage) VALUES
