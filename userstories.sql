@@ -83,3 +83,37 @@ so that I can order the correct items. */
 
 -- use the InventorySummary view and filter to view Low Stock status. 
 -- SELECT * FROM InventorySummary WHERE StockStatus = 'Low Stock';
+
+/* As a manager, I want to see the total price I will need to resupply
+	stock so that I can calculate the total amount spent on ingredients.
+*/
+
+-- assume the target quantity is 100 units for each ingredient.
+-- calculates the cost of resupplying each ingredient and sums
+-- up the total.
+-- SELECT 
+-- 	ingredient_name AS IngredientName, -- name of ingredient
+--     ingredient_cost AS CostPerUnit,	   -- cost per unit of ingredient
+--     CASE 
+-- 		-- calculate the quantity needed to reach the desired stock level (100 units).
+-- 		WHEN 100 - quantity > 0 THEN 100 - quantity 
+--         ELSE 0	-- if the stock is already sufficient, then no quantity is needed. 
+-- 	END AS QuantityToOrder,
+--     (CASE  
+-- 		-- calculate the total cost for the quantity to be orderd. 
+-- 		WHEN 100 - quantity > 0 THEN 100 - quantity
+--         ELSE 0 -- if no additional quantity is needed, then the total cost is 0. 
+-- 	END * ingredient_cost) AS TotalCost	-- multiply the quantity to order by the cost per unit for total cost.
+-- FROM 
+-- 	Inventory; 
+    
+-- to calculate the total cost for ALL ingredients to the target level
+-- SELECT 
+-- 	-- for each ingredient, calculate the cost to reach the target level (100 units)
+-- 	SUM(CASE
+-- 		WHEN 100 - quantity > 0 THEN (100 - quantity) * ingredient_cost
+--         ELSE 0 -- if no additional quantity is needed, the cost is 0 for that ingredient
+-- 	END) AS TotalResupplyCost	-- sum up the costs for all the ingredients
+-- FROM 
+-- 	Inventory; 
+
