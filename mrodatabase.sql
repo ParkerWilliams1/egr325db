@@ -26,6 +26,7 @@ CREATE TABLE OrderStatus (
 CREATE TABLE Inventory (
     ingredient_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each ingredient.
     ingredient_name VARCHAR(100) NOT NULL UNIQUE, -- must have unique ingredient names. 
+    ingredient_cost DECIMAL(10, 2) NOT NULL DEFAULT 0.00, -- cost of each ingredient
     quantity INT DEFAULT 0 CHECK (quantity >= 0)  -- current stock level, must be non-negative.
 );
 
