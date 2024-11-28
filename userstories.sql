@@ -216,4 +216,68 @@ conflicts with other employees when handling and creating orders. */
 --     1, -- quantity
 --     'Medium' -- size
 -- );
--- SELECT * FROM AssignedOrders WHERE EmployeeName IS NULL;  -- retrives all unassigned orders. 
+-- SELECT * FROM AssignedOrders WHERE EmployeeName IS NULL;  -- retrives all unassigned orders.
+
+/* as a manager, I want to assign my employees to open shifts 
+to manage the operations at my restaurant efficiently. 
+*/
+
+-- create a procedure to assign an employee to an open shift. 
+-- DELIMITER // 
+-- CREATE PROCEDURE AssignEmployeeToShift (
+-- 		IN p_shift_id INT, -- shift to be assigned
+--         IN p_employee_id INT -- employee assigned being assigned 
+-- )	
+-- BEGIN 
+-- 	DECLARE v_existing_employee INT;	-- check if a shift has already been taken
+--     DECLARE v_start_time TIME;	-- start time of the shift being assigned.
+--     DECLARE v_end_time TIME;	-- end time of the shift being assigned
+--     DECLARE v_date DATE;	-- date of the shift being assigned
+--     DECLARE v_conflict_count INT;	-- number of conflicting shifts
+--     
+--     -- check if a shift is already assigned to an employee.
+--     SELECT employee_id INTO v_existing_employee
+--     FROM Shift 
+--     WHERE shift_id = p_shift_id ;
+--     
+--     -- if the shift is already assigned, raise an error 
+--     IF v_existing_employee IS NOT NULL THEN
+-- 		SIGNAL SQLSTATE '45000'
+--         SET MESSAGE_TEXT = 'This shift has already been assigned';
+-- 	END IF; 
+--     
+--     -- retrieve details of the shift being assigned 
+--     SELECT shift_date, start_time, end_time
+--     INTO v_date, v_start_time, v_end_time
+--     FROM Shift 
+--     WHERE shift_id = p_shift_id;
+--     
+--     -- check for conflicts with employee's existing shifts. 
+--     SELECT COUNT(*)
+--     INTO v_conflict_count
+-- 	FROM Shift 
+--     WHERE employee_id = p_employee_id
+-- 		AND shift_date = v_date -- same date
+--         AND (v_start_time < end_time AND v_end_time > start_time); -- time overlap.
+--         
+-- 	IF v_conflict_count > 0 THEN 
+-- 		SIGNAL SQLSTATE '45000'
+--         SET MESSAGE_TEXT = 'Employee has a conflicting shift on the same date.';
+-- 	END IF;
+--     
+--     -- assign employee to the shift. 
+--     UPDATE Shift 
+--     SET employee_id = p_employee_id 
+--     WHERE shift_id = p_shift_id;
+--     
+--     -- confirm the assignment 
+--     SELECT CONCAT('Shift ', p_shift_id, ' has been assigned to Employee ', p_employee_id) AS AssignmentStatus;
+--     
+-- END //
+
+-- DELIMITER ;
+
+-- -- list all avaliable shifts 
+-- SELECT *
+-- FROM Shift
+-- WHERE employee_id IS NULL;
