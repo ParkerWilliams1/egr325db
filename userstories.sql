@@ -174,3 +174,46 @@ conflicts with other employees when handling and creating orders. */
 -- 	OrderStatus os ON o.order_status_id = os.status_id
 -- ORDER BY 
 -- 	o.order_date ASC;
+
+/* as an employee, I want to view my customer’s order I am
+ assigned to, so I prepare the right order on time.
+*/
+
+-- create a view for employees to access their assigned orders.
+-- CREATE VIEW AssignedOrders AS
+-- SELECT 
+--     o.order_id AS OrderID,
+--     c.customer_name AS CustomerName,
+--     o.order_date AS OrderDate,
+--     os.status_name AS OrderStatus,
+--     o.delivery_type AS DeliveryType,
+--     o.delivery_address AS DeliveryAddress,
+--     o.total_amount AS TotalAmount,
+--     e.employee_name AS EmployeeName 
+-- FROM 
+--     CustomerOrder o
+-- JOIN 
+--     Customer c ON o.customer_id = c.customer_id
+-- JOIN 
+--     OrderStatus os ON o.order_status_id = os.status_id
+-- LEFT JOIN 
+-- 	Employee e ON o.employee_id = e.employee_id;
+
+-- shows all assigned orders
+-- SELECT * FROM AssignedOrders;
+
+-- filter orderes by an employees name
+-- SELECT * FROM AssignedOrders WHERE EmployeeName = 'Charlie Davis';
+
+-- views orders without assigned employees
+-- CALL AddNewOrder(
+--     5, -- customer_id (e.g., micheal johnson)
+--     NULL, -- employee_id (no employee assigned)
+--     1, -- order_status_id (e.g., 'Received')
+--     'delivery', -- delivery_type
+--     '456 Elm Street', -- delivery_address
+--     2, -- menu_id (e.g., cheese pizza)
+--     1, -- quantity
+--     'Medium' -- size
+-- );
+-- SELECT * FROM AssignedOrders WHERE EmployeeName IS NULL;  -- retrives all unassigned orders. 
