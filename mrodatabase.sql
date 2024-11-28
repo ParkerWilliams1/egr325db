@@ -116,7 +116,7 @@ CREATE TABLE Shift (
     shift_date DATE NOT NULL,                -- date of the shift.
     start_time TIME NOT NULL,                -- shift start time.
     end_time TIME NOT NULL,                  -- shift end time.
-    employee_id INT NOT NULL,                -- employee assigned to the shift.
+    employee_id INT,                -- employee assigned to the shift.
     FOREIGN KEY (employee_id) REFERENCES Employee(employee_id) ON DELETE CASCADE, -- Cascade delete if employee removed.
     CHECK (start_time < end_time)            -- ensure shift start time is before end time.
 );
