@@ -117,3 +117,60 @@ so that I can order the correct items. */
 -- FROM 
 -- 	Inventory; 
 
+/* As an 
+employee, I want to be assigned to a customer’s order to avoid 
+conflicts with other employees when handling and creating orders. */
+
+-- stored procedure assigns an employee to an order:
+-- DELIMITER //
+
+-- CREATE PROCEDURE AssignEmployeeToOrder (
+-- 	IN p_order_id INT, -- the order assigned to the employee
+--     IN p_employee_id INT -- the employee assigned to the order
+-- )
+-- BEGIN
+-- 	DECLARE v_existing_employee INT;
+--     
+--     -- check if the order has already been assigned to another employee
+--     SELECT employee_id INTO v_existing_employee
+--     FROM CustomerOrder
+--     WHERE order_id = p_order_id; 
+--     
+--     -- if the order is already assigned, display an error message
+--     IF v_existing_employee IS NOT NULL AND v_existing_employee != p_employee_id THEN
+-- 		SIGNAL SQLSTATE '45000'
+--         SET MESSAGE_TEXT = 'This order has already been assigned to another employee.';
+-- 	END IF;
+--     
+--     -- assign the order to an employee
+--     UPDATE CustomerOrder
+--     SET employee_id = p_employee_id
+--     WHERE order_id = p_order_id;
+--     
+--     -- confirm the assignement
+--     SELECT CONCAT('Order ', p_order_id, ' has been assigned to employee ', p_employee_id) AS AssignmentStatus;
+-- END //
+--  
+-- DELIMITER ; 
+
+-- CALL AssignEmployeeToOrder(1, 2); -- assigns Employee 2 to order 1. 
+
+-- CALL AssignEmployeeToOrder(1, 3); -- attempt to assign Employee 3 to Order 1 (error).
+
+-- To confrim which orders are assigned to employees
+-- SELECT 
+-- 	o.order_id AS OrderID,
+--     e.employee_name AS EmployeeName,
+--     c.customer_name AS CustomerName,
+--     o.order_date AS OrderDate,
+--     os.status_name AS OrderStatus
+-- FROM 
+-- 	CustomerOrder o 
+-- LEFT JOIN 
+-- 	Employee e ON o.employee_id = e.employee_id
+-- JOIN 
+-- 	Customer c ON o.customer_id = c.customer_id
+-- JOIN 
+-- 	OrderStatus os ON o.order_status_id = os.status_id
+-- ORDER BY 
+-- 	o.order_date ASC;
