@@ -281,3 +281,33 @@ to manage the operations at my restaurant efficiently.
 -- SELECT *
 -- FROM Shift
 -- WHERE employee_id IS NULL;
+
+/* as a manager, I want to view all the employee’s 
+shifts so that I can keep track of each shift an employee */
+
+-- CREATE VIEW EmployeeShifts AS
+-- SELECT 
+--     s.shift_id AS ShiftID,
+--     s.shift_date AS Date,
+--     s.start_time AS StartTime,
+--     s.end_time AS EndTime,
+--     e.employee_name AS EmployeeName
+-- FROM 
+--     Shift s
+-- JOIN 
+--     Employee e ON s.employee_id = e.employee_id;
+
+-- SELECT * FROM EmployeeShifts; -- query the view. 
+
+-- SELECT * FROM EmployeeShifts WHERE EmployeeName = 'Emily White'; -- query the view filtering by an employee's name. 
+
+-- -- query the total amount of shifts a employee has worked
+-- SELECT 
+--     e.employee_name AS EmployeeName,
+--     COUNT(s.shift_id) AS TotalShifts
+-- FROM 
+--     Shift s
+-- JOIN 
+--     Employee e ON s.employee_id = e.employee_id
+-- GROUP BY 
+--     e.employee_name;
