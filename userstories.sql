@@ -311,3 +311,66 @@ shifts so that I can keep track of each shift an employee */
 --     Employee e ON s.employee_id = e.employee_id
 -- GROUP BY 
 --     e.employee_name;
+
+
+/* As a manager I want to track the payments of customers so that
+I can see the revunue the pizzeria is generating.  
+*/
+
+-- query all details of payments 
+-- SELECT 
+-- 	p.payment_id AS PaymentID,
+--     p.payment_date AS PaymentDate, 
+--     p.payment_amount AS PaymentAmount, 
+--     p.payment_method AS PaymentMethod,
+-- 	o.order_id AS OrderID,
+--     c.customer_name AS CustomerName
+-- FROM 
+-- 	Payment p
+-- JOIN 
+-- 	CustomerOrder o ON p.order_id = o.order_id
+-- JOIN 
+-- 	Customer c ON o.customer_id = c.customer_id
+-- ORDER BY 
+-- 	p.payment_date DESC;		-- order by the most recent payment.
+
+
+-- -- query to calculate the total revenue
+-- SELECT 
+-- 	SUM(p.payment_amount) AS TotalRevenue
+-- FROM 
+-- 	Payment p; 
+    
+-- -- query to track revenue in a specific time period 
+-- SELECT 
+-- 	p.payment_date AS PaymentDate,
+--     SUM(p.payment_amount) AS TotalRevenue
+-- FROM 
+-- 	Payment p
+-- WHERE 
+-- 	p.payment_date BETWEEN '2024-11-22' AND '2024-11-23'
+-- GROUP BY
+-- 	p.payment_date
+-- ORDER BY 
+-- 	p.payment_date DESC; 
+    
+-- -- query to track revenue by payment method
+-- SELECT 
+-- 	p.payment_method AS PaymentMethod,
+--     SUM(p.payment_amount) AS TotalRevenue
+-- FROM 
+-- 	Payment p
+-- GROUP BY p.payment_method; 
+
+-- -- query to track daily revenue in a given month
+-- SELECT 
+-- 	DATE(p.payment_date) AS PaymentDate,
+--     SUM(p.payment_amount) AS DailyRevenue
+-- FROM 
+-- 	Payment p
+-- WHERE 
+-- 	p.payment_date BETWEEN '2024-11-01' AND '2024-11-30'
+-- GROUP BY 
+-- 	DATE(p.payment_date)
+-- ORDER BY 
+-- 	PaymentDate DESC;
