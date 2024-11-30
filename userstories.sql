@@ -374,3 +374,24 @@ I can see the revunue the pizzeria is generating.
 -- 	DATE(p.payment_date)
 -- ORDER BY 
 -- 	PaymentDate DESC;
+
+/* as a customer I want to view my past orders so that I can 
+reorder items that I liked. 
+*/
+
+-- retrieve customer order history 
+-- SELECT
+-- 	o.order_id AS OrderID,
+--     o.order_date AS OrderDate,
+--     os.status_name AS OrderStatus,
+--     o.delivery_type AS DeliveryType,
+--     o.delivery_address AS DeliveryAddress,
+--     o.total_amount AS TotalAmount
+-- FROM 
+-- 	CustomerOrder o
+-- JOIN 
+-- 	OrderStatus os ON o.order_status_id = os.status_id
+-- WHERE 
+-- 	o.customer_id = 1 		-- replace with desried customer id. 
+-- ORDER BY 
+-- 	o.order_date DESC;	
