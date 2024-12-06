@@ -200,3 +200,30 @@ LEFT JOIN Employee e ON o.employee_id = e.employee_id;
 
 -- orders handles by a specific employee 
 -- SELECT * FROM OrderSummary WHERE EmployeeName = 'Charlie Davis';
+
+-- Trigger to test that user correctly entered only digits for phone number
+DELIMITER //
+
+CREATE TRIGGER trg_validate_phone_number
+BEFORE INSERT OR UPDATE ON PhoneNumbers
+FOR EACH ROW
+BEGIN
+    -- Validate phone number contains exactly 10 digits
+    IF NOT (NEW.phone_number REGEXP '^[0-9]{10}$') THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Phone number must be exactly 10 digits.';
+    END IF;
+END //
+
+DELIMITER ;
+
+/*
+-- Valid phone number
+INSERT INTO PhoneNumbers (phone_number) VALUES ('1234567890');
+
+-- Invalid phone number (less than 10 digits)
+INSERT INTO PhoneNumbers (phone_number) VALUES ('12345'); -- Raises error
+
+-- Invalid phone number (contains letters)
+INSERT INTO PhoneNumbers (phone_number) VALUES ('12345abcde'); -- Raises error
+*/
