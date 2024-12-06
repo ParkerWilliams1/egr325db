@@ -232,14 +232,61 @@ END //
 
 DELIMITER ;
 
+/*
 -- Valid phone number 
-	-- INSERT INTO Customer (customer_name, email_address, phone_number, address) 
--- 	VALUES ('John Doe', 'johndoe@example.com', '1234567890', '123 Main St, Springfield, IL 62701');
+INSERT INTO Customer (customer_name, email_address, phone_number, address) 
+VALUES ('John Doe', 'johndoe@example.com', '1234567890', '123 Main St, Springfield, IL 62701');
 
 -- Invalid phone number with letters
--- INSERT INTO Customer (customer_name, email_address, phone_number, address) 
--- VALUES ('Jane Doe', 'janedoe@example.com', '12345ae567', '456 Oak St, Springfield, IL 62702');
+INSERT INTO Customer (customer_name, email_address, phone_number, address) 
+VALUES ('Jane Doe', 'janedoe@example.com', '12345ae567', '456 Oak St, Springfield, IL 62702');
 
 -- Invalid phone number with special characters
--- INSERT INTO Customer (customer_name, email_address, phone_number, address) 
--- VALUES ('Alice Smith', 'alice@example.com', '1234!@#567', '789 Pine St, Springfield, IL 62703');
+INSERT INTO Customer (customer_name, email_address, phone_number, address) 
+VALUES ('Alice Smith', 'alice@example.com', '1234!@#567', '789 Pine St, Springfield, IL 62703');
+*/
+
+-- Trigger to test that employees correctly entered only digits for phone number
+DELIMITER //
+
+CREATE TRIGGER trg_validate_employee_phone_number_update
+BEFORE UPDATE ON Employee
+FOR EACH ROW
+BEGIN
+    -- Ensure phone number does not contain any letters or special characters
+    IF NOT (NEW.phone_number REGEXP '^[0-9]{10}$') THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Customer phone number cannot contain any letters or special characters.';
+    END IF;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER trg_validate_employee_phone_number_insert
+BEFORE INSERT ON Employee
+FOR EACH ROW
+BEGIN
+    -- Ensure phone number does not contain any letters or special characters
+    IF NOT (NEW.phone_number REGEXP '^[0-9]{10}$') THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Customer phone number cannot contain any letters or special characters.';
+    END IF;
+END //
+
+DELIMITER ;
+
+/*
+-- Valid phone number
+INSERT INTO Employee (employee_name, email_address, phone_number, hire_date, role, wage) 
+VALUES ('John Doe', 'johndoe@example.com', '1234567890', '2024-12-05', 'Employee', 15.00);
+
+-- Invalid phone number with letters
+INSERT INTO Employee (employee_name, email_address, phone_number, hire_date, role, wage) 
+VALUES ('Jane Doe', 'janedoe@example.com', '12345ae567', '2024-12-05', 'Employee', 16.00);
+
+-- Invalid phone number with special characters
+INSERT INTO Employee (employee_name, email_address, phone_number, hire_date, role, wage) 
+VALUES ('Alice Smith', 'alice@example.com', '1234!@#567', '2024-12-05', 'Manager', 20.00);
+*/
