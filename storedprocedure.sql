@@ -204,31 +204,42 @@ LEFT JOIN Employee e ON o.employee_id = e.employee_id;
 -- Trigger to test that user correctly entered only digits for phone number
 DELIMITER //
 
-CREATE TRIGGER trg_validate_customer_phone_number
-BEFORE INSERT OR UPDATE ON Customer
+CREATE TRIGGER trg_validate_customer_phone_number_update
+BEFORE UPDATE ON Customer
 FOR EACH ROW
 BEGIN
     -- Ensure phone number does not contain any letters or special characters
     IF NOT (NEW.phone_number REGEXP '^[0-9]{10}$') THEN
         SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = 'Customer phone number cannot contain any letters or special characters).';
+        SET MESSAGE_TEXT = 'Customer phone number cannot contain any letters or special characters.';
     END IF;
 END //
 
 DELIMITER ;
 
-/*
+DELIMITER //
 
--- Valid phone number
-INSERT INTO Customer (customer_name, email_address, phone_number, address) 
-VALUES ('John Doe', 'johndoe@example.com', '1234567890', '123 Main St, Springfield, IL 62701');
+CREATE TRIGGER trg_validate_customer_phone_number_insert
+BEFORE INSERT ON Customer
+FOR EACH ROW
+BEGIN
+    -- Ensure phone number does not contain any letters or special characters
+    IF NOT (NEW.phone_number REGEXP '^[0-9]{10}$') THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Customer phone number cannot contain any letters or special characters.';
+    END IF;
+END //
+
+DELIMITER ;
+
+-- Valid phone number 
+	-- INSERT INTO Customer (customer_name, email_address, phone_number, address) 
+-- 	VALUES ('John Doe', 'johndoe@example.com', '1234567890', '123 Main St, Springfield, IL 62701');
 
 -- Invalid phone number with letters
-INSERT INTO Customer (customer_name, email_address, phone_number, address) 
-VALUES ('Jane Doe', 'janedoe@example.com', '12345ae567', '456 Oak St, Springfield, IL 62702');
+-- INSERT INTO Customer (customer_name, email_address, phone_number, address) 
+-- VALUES ('Jane Doe', 'janedoe@example.com', '12345ae567', '456 Oak St, Springfield, IL 62702');
 
 -- Invalid phone number with special characters
-INSERT INTO Customer (customer_name, email_address, phone_number, address) 
-VALUES ('Alice Smith', 'alice@example.com', '1234!@#567', '789 Pine St, Springfield, IL 62703');
-
-*/
+-- INSERT INTO Customer (customer_name, email_address, phone_number, address) 
+-- VALUES ('Alice Smith', 'alice@example.com', '1234!@#567', '789 Pine St, Springfield, IL 62703');
