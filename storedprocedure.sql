@@ -204,26 +204,31 @@ LEFT JOIN Employee e ON o.employee_id = e.employee_id;
 -- Trigger to test that user correctly entered only digits for phone number
 DELIMITER //
 
-CREATE TRIGGER trg_validate_phone_number
-BEFORE INSERT OR UPDATE ON PhoneNumbers
+CREATE TRIGGER trg_validate_customer_phone_number
+BEFORE INSERT OR UPDATE ON Customer
 FOR EACH ROW
 BEGIN
-    -- Validate phone number contains exactly 10 digits
+    -- Ensure phone number does not contain any letters or special characters
     IF NOT (NEW.phone_number REGEXP '^[0-9]{10}$') THEN
         SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = 'Phone number must be exactly 10 digits.';
+        SET MESSAGE_TEXT = 'Customer phone number cannot contain any letters or special characters).';
     END IF;
 END //
 
 DELIMITER ;
 
 /*
+
 -- Valid phone number
-INSERT INTO PhoneNumbers (phone_number) VALUES ('1234567890');
+INSERT INTO Customer (customer_name, email_address, phone_number, address) 
+VALUES ('John Doe', 'johndoe@example.com', '1234567890', '123 Main St, Springfield, IL 62701');
 
--- Invalid phone number (less than 10 digits)
-INSERT INTO PhoneNumbers (phone_number) VALUES ('12345'); -- Raises error
+-- Invalid phone number with letters
+INSERT INTO Customer (customer_name, email_address, phone_number, address) 
+VALUES ('Jane Doe', 'janedoe@example.com', '12345ae567', '456 Oak St, Springfield, IL 62702');
 
--- Invalid phone number (contains letters)
-INSERT INTO PhoneNumbers (phone_number) VALUES ('12345abcde'); -- Raises error
+-- Invalid phone number with special characters
+INSERT INTO Customer (customer_name, email_address, phone_number, address) 
+VALUES ('Alice Smith', 'alice@example.com', '1234!@#567', '789 Pine St, Springfield, IL 62703');
+
 */
