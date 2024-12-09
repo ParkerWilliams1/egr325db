@@ -21,7 +21,7 @@ CREATE TABLE CustomerAddress (
     city VARCHAR(100) NOT NULL,		-- city 
     state VARCHAR(50) NOT NULL CHECK (state = 'CA'),	-- MRO pizzeria is only located in California. 
     zipcode VARCHAR(10) NOT NULL CHECK (LENGTH(zipcode) = 5),			-- zipcodes 
-    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE CASCADE	-- delere
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE CASCADE -- if a customer is deleted, so is their address
  );
 
 -- Table: OrderStatus
