@@ -1,4 +1,4 @@
-CREATE DATABASE MRO; 
+ CREATE DATABASE MRO; 
 USE MRO;
 
 -- Table: Customer
@@ -8,9 +8,21 @@ CREATE TABLE Customer (
     customer_id INT AUTO_INCREMENT PRIMARY KEY, -- unqiue ID for each customer.
     customer_name VARCHAR(100) NOT NULL,        -- customer's full name.
     email_address VARCHAR(150) NOT NULL UNIQUE, -- email must be unique for identification.
-    phone_number VARCHAR(10) NOT NULL UNIQUE CHECK (LENGTH(phone_number) = 10), -- phone number must be 10 digits..
-    address VARCHAR(255)    -- address for delivery orders. NULL for pickup orders.
+    phone_number VARCHAR(10) NOT NULL UNIQUE CHECK (LENGTH(phone_number) = 10) -- phone number must be 10 digits..
 );
+
+-- Table: Customer Address
+-- holds detailed address information of each customer
+CREATE TABLE CustomerAddress (
+	customer_address_id  INT AUTO_INCREMENT PRIMARY KEY,	-- unique id for each address
+	customer_id INT NOT NULL, -- id of the customer 
+    address_type ENUM('House','Apartment','Business','Hotel','Other') NOT NULL DEFAULT 'House',		-- the type of address
+    street VARCHAR(255) NOT NULL,	-- street address
+    city VARCHAR(100) NOT NULL,		-- city 
+    state VARCHAR(50) NOT NULL CHECK (state = 'CA'),	-- MRO pizzeria is only located in California. 
+    zipcode VARCHAR(10) NOT NULL CHECK (LENGTH(zipcode) = 5),			-- zipcodes 
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE CASCADE	-- delere
+ );
 
 -- Table: OrderStatus
 -- defines the various statuses an order can have.
@@ -52,12 +64,13 @@ CREATE TABLE CustomerOrder (
     order_status_id INT NOT NULL,                     -- status ID of the order (e.g., 'Completed' or 'Cancelled').
     employee_id INT,                         		  -- employee handling the order.
     order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, -- timestamp when the order was placed.
-    delivery_address VARCHAR(255),          -- delivery address. NULL for pickup orders.
+    customer_address_id INT, 
     total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0), -- total price of the order.
     delivery_type ENUM('delivery', 'pickup') NOT NULL, -- type of order: delivery or pickup.
     FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON DELETE RESTRICT, -- prevent deletion of customer if ordre exists.
     FOREIGN KEY (order_status_id) REFERENCES OrderStatus(status_id) ON DELETE RESTRICT, -- prevents status deletion if referenced.
-    FOREIGN KEY (employee_id) REFERENCES Employee(employee_id) ON DELETE SET NULL -- link to handling employee.
+    FOREIGN KEY (employee_id) REFERENCES Employee(employee_id) ON DELETE SET NULL,-- link to handling employee.
+    FOREIGN KEY (customer_address_id) REFERENCES CustomerAddress(customer_address_id) ON DELETE SET NULL -- If address is removed, the order remains with a NULL address. 
 );
 
 -- Table: MenuItem
