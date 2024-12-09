@@ -7,10 +7,10 @@ CREATE PROCEDURE AddNewOrder (
     IN p_employee_id INT, -- ID of the employee handling the order
     IN p_order_status_id INT, -- current status of the order (e.g., Received, Completed)
     IN p_delivery_type ENUM('delivery', 'pickup'), -- type of the order: delivery or pickup
-    IN p_delivery_address VARCHAR(255), -- address for delivery orders (NULL for pickup)
+    IN p_customer_address_id INT, -- address for delivery orders (NULL for pickup)
     IN p_menu_id INT, -- ID of the menu item being ordered
     IN p_quantity INT, -- quantity of the menu item being ordered
-    IN p_size ENUM('Small', 'Medium', 'Large', 'X-Large') -- size of the menu item
+    IN p_size ENUM('Small', 'Medium', 'Large', 'Extra Large') -- size of the menu item
 )
 BEGIN
     -- declare variables to store values
@@ -46,10 +46,10 @@ BEGIN
 
     -- insert a new order into the CustomerOrder table
     INSERT INTO CustomerOrder (
-        customer_id, order_status_id, employee_id, delivery_type, delivery_address, total_amount
+        customer_id, order_status_id, employee_id, delivery_type, customer_address_id, total_amount
     )
     VALUES (
-        p_customer_id, p_order_status_id, p_employee_id, p_delivery_type, p_delivery_address, v_total_amount
+        p_customer_id, p_order_status_id, p_employee_id, p_delivery_type, p_customer_address_id, v_total_amount
     );
 
     -- insert the ordered item into the OrderItem table
@@ -66,31 +66,42 @@ END //
 
 DELIMITER ;
 
--- -- uses the procedure to add a new order.
+-- uses the procedure to add a new order.
 -- CALL AddNewOrder (
 -- 	1, -- customer id
 --     2, -- employee_id
 --     1, -- 'Recieved' order status
 --     'delivery', -- type of order
---     '123 Main Street', -- address
+--     '1', -- customer address id 
 --     1, -- menu id (pepperoni pizza)
 --     3, -- quantity
 --     'Large' -- size
 -- );
 
+-- CALL AddNewOrder (
+-- 	2, -- customer id
+--     3, -- employee_id
+--     2, -- 'In progress' order status
+--     'pickup', -- type of order
+--     NULL, -- no address for pickup. 
+--     2, -- menu id (cheese pizza)
+--     1, -- quantity
+--     'Small' -- size
+-- );
+
 -- select statements to confirm changes: 
 
--- -- check new entry for customer order.
--- SELECT * FROM CustomerOrder WHERE customer_id = 1 ORDER BY order_id DESC LIMIT 1;
+-- check new entry for customer order.
+SELECT * FROM CustomerOrder WHERE customer_id = 1 ORDER BY order_id DESC LIMIT 1;
 
--- -- check new entry in OrderItem.
--- SELECT * FROM OrderItem WHERE order_id = (SELECT MAX(order_id) FROM CustomerOrder);
+-- check new entry in OrderItem.
+SELECT * FROM OrderItem WHERE order_id = (SELECT MAX(order_id) FROM CustomerOrder);
 
--- -- check inventory for pepperoni (ingredient_id: 3)
--- SELECT * FROM Inventory WHERE ingredient_id = 3;
+-- check inventory for pepperoni (ingredient_id: 3)
+SELECT * FROM Inventory WHERE ingredient_id = 3;
 
--- -- check inventory for dough (ingredient_id: 4)
--- SELECT * FROM Inventory WHERE ingredient_id = 4;
+-- check inventory for cheese (ingredient_id: 1)
+SELECT * FROM Inventory WHERE ingredient_id = 1;
 
 -- uses invalid data for the procedure. 
 -- insufficient inventory error. 
@@ -99,7 +110,7 @@ DELIMITER ;
 --     2,
 --     1,
 --     'delivery',
---     '123 Main Street',
+--     '3',
 --     1,
 --     500, -- exceeds stock
 --     'Extra Large' 
@@ -174,32 +185,33 @@ DELIMITER ;
 -- custom view to provide detailed order summaries 
 CREATE VIEW OrderSummary AS 
 SELECT 
-	o.order_id AS OrderID,				-- the ID of the order from CustomerOrder
+    o.order_id AS OrderID,				-- the ID of the order from CustomerOrder
     c.customer_name AS CustomerName,	-- name of the customer from Customer table 
     os.status_name AS OrderStatus, 		-- the status of the order from OrderStatus
     e.employee_name AS EmployeeName,	-- name of the employee handling the order
     CalculateOrderTotal(o.order_id) AS TotalAmount, -- total amount of the order
     o.delivery_type AS DeliveryType,	-- delivery order or pickup from CustomerOrder
-    o.delivery_address AS DeliveryAddress	-- deleivery address of a customer. (NULL if pickup)
+    CONCAT_WS(', ', ca.street, ca.city, ca.state, ca.zipcode) AS DeliveryAddress	-- deleivery address of a customer. (NULL if pickup)
 FROM 
 	CustomerOrder o
 -- LEFT JOIN ensures the view still works if some optional fields are NULL
 LEFT JOIN Customer c ON o.customer_id = c.customer_id	
 LEFT JOIN OrderStatus os ON o.order_status_id = os.status_id
-LEFT JOIN Employee e ON o.employee_id = e.employee_id;
+LEFT JOIN Employee e ON o.employee_id = e.employee_id	
+LEFT JOIN CustomerAddress ca ON o.customer_address_id = ca.customer_address_id;
 
 -- test the custom view:
 -- retrieve all orders with their details
--- SELECT * FROM OrderSummary; 
+SELECT * FROM OrderSummary; 
 
 -- orders above a specific amount
--- SELECT * FROM OrderSummary WHERE TotalAmount > 50;
+SELECT * FROM OrderSummary WHERE TotalAmount > 50;
 
 -- only delivery orders
--- SELECT * FROM OrderSummary WHERE DeliveryType = 'delivery';
+SELECT * FROM OrderSummary WHERE DeliveryType = 'delivery';
 
 -- orders handles by a specific employee 
--- SELECT * FROM OrderSummary WHERE EmployeeName = 'Charlie Davis';
+SELECT * FROM OrderSummary WHERE EmployeeName = 'Charlie Davis';
 
 -- Trigger to test that user correctly entered only digits for phone number
 DELIMITER //
