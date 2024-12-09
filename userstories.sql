@@ -1,16 +1,16 @@
 -- User story demonstrations 
+USE MRO;
 
--- USER STORY 1  
--- As a customer, I want to order a delivery online
--- so that I can enjoy my meal at my own home.
+/* As a customer, I want to order a delivery online
+	so that I can enjoy my meal at my own home. */
 
 -- call the stored procedure to add a new order
 -- CALL AddNewOrder(
 -- 	1, -- customer_id "John Doe"
---     NULL, -- employee_id (not assigned intially)
+--     5, -- employee_id 
 --     1, -- order status. ('recieved)
 --     'delivery', -- order type (delivery order)
---     '123 Elm Street', -- delivery address
+--     1, -- customer address id 
 --     1, -- menu_id (pepperoni pizza)
 --     2, -- quantity 
 --     'Large' -- size
@@ -30,9 +30,8 @@
 -- -- OrderSummary view to view complete order information
 -- SELECT * FROM OrderSummary WHERE CustomerName = 'John Doe';
 
--- USER STORY 2
--- As a customer I want to view my order status so I can 
--- easily adjust my routine to the order. 
+/* As a customer I want to view my order status so I can 
+ easily adjust my routine to the order. */
 
 -- view all orders for a customer 
 -- SELECT 	
@@ -40,12 +39,14 @@
 --     o.order_date AS OrderDate,
 --     os.status_name AS OrderStatus,
 --     o.delivery_type AS DeliveryType,
---     o.delivery_address AS DeliveryAddress,
+--     CONCAT_WS(', ', ca.street, ca.city, ca.state, ca.zipcode) AS DeliveryAddress,
 --     o.total_amount AS TotalAmount
 -- FROM 
 -- 	CustomerOrder o
 -- JOIN 
 -- 	OrderStatus os ON o.order_status_id = os.status_id
+-- LEFT JOIN
+-- CustomerAddress ca ON o.customer_address_id = ca.customer_address_id
 -- WHERE
 -- 	o.customer_id = 1 -- replace 1 with the customers ID. 
 -- ORDER BY 
@@ -75,8 +76,8 @@ inventory so that I can prevent supply from running out. */
 -- 	END AS StockStatus
 -- FROM 
 -- 	Inventory; 
-        
--- SELECT * FROM InventorySummary; 
+--         
+-- SELECT * FROM InventorySummary;
 
 /* As a manager, I want to see the menu items that need to be restocked 
 so that I can order the correct items. */
@@ -106,8 +107,8 @@ so that I can order the correct items. */
 -- 	END * ingredient_cost) AS TotalCost	-- multiply the quantity to order by the cost per unit for total cost.
 -- FROM 
 -- 	Inventory; 
-    
--- to calculate the total cost for ALL ingredients to the target level
+--     
+-- -- to calculate the total cost for ALL ingredients to the target level
 -- SELECT 
 -- 	-- for each ingredient, calculate the cost to reach the target level (100 units)
 -- 	SUM(CASE
@@ -120,7 +121,6 @@ so that I can order the correct items. */
 /* As an 
 employee, I want to be assigned to a customer’s order to avoid 
 conflicts with other employees when handling and creating orders. */
-
 -- stored procedure assigns an employee to an order:
 -- DELIMITER //
 
@@ -135,7 +135,7 @@ conflicts with other employees when handling and creating orders. */
 --     SELECT employee_id INTO v_existing_employee
 --     FROM CustomerOrder
 --     WHERE order_id = p_order_id; 
---     
+--   
 --     -- if the order is already assigned, display an error message
 --     IF v_existing_employee IS NOT NULL AND v_existing_employee != p_employee_id THEN
 -- 		SIGNAL SQLSTATE '45000'
@@ -154,8 +154,7 @@ conflicts with other employees when handling and creating orders. */
 -- DELIMITER ; 
 
 -- CALL AssignEmployeeToOrder(1, 2); -- assigns Employee 2 to order 1. 
-
--- CALL AssignEmployeeToOrder(1, 3); -- attempt to assign Employee 3 to Order 1 (error).
+-- CALL AssignEmployeeToOrder(1, 3); -- Attempt to assign Employee 3 to Order 1
 
 -- To confrim which orders are assigned to employees
 -- SELECT 
@@ -163,7 +162,8 @@ conflicts with other employees when handling and creating orders. */
 --     e.employee_name AS EmployeeName,
 --     c.customer_name AS CustomerName,
 --     o.order_date AS OrderDate,
---     os.status_name AS OrderStatus
+--     os.status_name AS OrderStatus,
+--     CONCAT_WS(', ', ca.street, ca.city, ca.state, ca.zipcode) AS DeliveryAddress
 -- FROM 
 -- 	CustomerOrder o 
 -- LEFT JOIN 
@@ -172,6 +172,7 @@ conflicts with other employees when handling and creating orders. */
 -- 	Customer c ON o.customer_id = c.customer_id
 -- JOIN 
 -- 	OrderStatus os ON o.order_status_id = os.status_id
+-- LEFT JOIN CustomerAddress ca ON o.customer_address_id = ca.customer_address_id
 -- ORDER BY 
 -- 	o.order_date ASC;
 
@@ -187,7 +188,7 @@ conflicts with other employees when handling and creating orders. */
 --     o.order_date AS OrderDate,
 --     os.status_name AS OrderStatus,
 --     o.delivery_type AS DeliveryType,
---     o.delivery_address AS DeliveryAddress,
+--     CONCAT_WS (', ', ca.street, ca.city, ca.state, ca.zipcode) AS DeliveryAddress,
 --     o.total_amount AS TotalAmount,
 --     e.employee_name AS EmployeeName 
 -- FROM 
@@ -197,26 +198,28 @@ conflicts with other employees when handling and creating orders. */
 -- JOIN 
 --     OrderStatus os ON o.order_status_id = os.status_id
 -- LEFT JOIN 
--- 	Employee e ON o.employee_id = e.employee_id;
+-- 	Employee e ON o.employee_id = e.employee_id
+-- LEFT JOIN
+-- CustomerAddress ca ON o.customer_address_id = ca.customer_address_id;
 
 -- shows all assigned orders
 -- SELECT * FROM AssignedOrders;
 
--- filter orderes by an employees name
+-- filter orders by an employees name
 -- SELECT * FROM AssignedOrders WHERE EmployeeName = 'Charlie Davis';
 
 -- views orders without assigned employees
 -- CALL AddNewOrder(
---     5, -- customer_id (e.g., micheal johnson)
+--     5, -- customer_id (e.g., John Doe)
 --     NULL, -- employee_id (no employee assigned)
 --     1, -- order_status_id (e.g., 'Received')
 --     'delivery', -- delivery_type
---     '456 Elm Street', -- delivery_address
---     2, -- menu_id (e.g., cheese pizza)
+--     2, -- delivery_address
+--     2, -- menu_id (e.g., Cheese Pizza)
 --     1, -- quantity
 --     'Medium' -- size
 -- );
--- SELECT * FROM AssignedOrders WHERE EmployeeName IS NULL;  -- retrives all unassigned orders.
+-- SELECT * FROM AssignedOrders WHERE EmployeeName IS NULL;  -- retrives all unassigned orders. 
 
 /* as a manager, I want to assign my employees to open shifts 
 to manage the operations at my restaurant efficiently. 
@@ -340,7 +343,7 @@ I can see the revunue the pizzeria is generating.
 -- 	SUM(p.payment_amount) AS TotalRevenue
 -- FROM 
 -- 	Payment p; 
-    
+--     
 -- -- query to track revenue in a specific time period 
 -- SELECT 
 -- 	p.payment_date AS PaymentDate,
@@ -353,7 +356,7 @@ I can see the revunue the pizzeria is generating.
 -- 	p.payment_date
 -- ORDER BY 
 -- 	p.payment_date DESC; 
-    
+   
 -- -- query to track revenue by payment method
 -- SELECT 
 -- 	p.payment_method AS PaymentMethod,
@@ -375,6 +378,7 @@ I can see the revunue the pizzeria is generating.
 -- ORDER BY 
 -- 	PaymentDate DESC;
 
+
 /* as a customer I want to view my past orders so that I can 
 reorder items that I liked. 
 */
@@ -385,13 +389,15 @@ reorder items that I liked.
 --     o.order_date AS OrderDate,
 --     os.status_name AS OrderStatus,
 --     o.delivery_type AS DeliveryType,
---     o.delivery_address AS DeliveryAddress,
+--     CONCAT_WS (', ', ca.street, ca.city, ca.state, ca.zipcode) AS DeliveryAddress,
 --     o.total_amount AS TotalAmount
 -- FROM 
 -- 	CustomerOrder o
 -- JOIN 
 -- 	OrderStatus os ON o.order_status_id = os.status_id
+-- LEFT JOIN 
+-- 	CustomerAddress ca ON o.customer_address_id = ca.customer_address_id
 -- WHERE 
 -- 	o.customer_id = 1 		-- replace with desried customer id. 
 -- ORDER BY 
--- 	o.order_date DESC;	
+-- 	o.order_date DESC;		-- show most recent order	
