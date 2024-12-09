@@ -8,7 +8,7 @@ CREATE TABLE Customer (
     customer_id INT AUTO_INCREMENT PRIMARY KEY, -- unqiue ID for each customer.
     customer_name VARCHAR(100) NOT NULL,        -- customer's full name.
     email_address VARCHAR(150) NOT NULL UNIQUE, -- email must be unique for identification.
-    phone_number VARCHAR(10) NOT NULL CHECK (LENGTH(phone_number) = 10), -- phone number must be 10 digits..
+    phone_number VARCHAR(10) NOT NULL UNIQUE CHECK (LENGTH(phone_number) = 10), -- phone number must be 10 digits..
     address VARCHAR(255)    -- address for delivery orders. NULL for pickup orders.
 );
 
@@ -36,8 +36,8 @@ CREATE TABLE Inventory (
 CREATE TABLE Employee (
     employee_id INT AUTO_INCREMENT PRIMARY KEY, -- unique ID for each employee.
     employee_name VARCHAR(100) NOT NULL,        -- full name of the employee.
-    email_address VARCHAR(150) UNIQUE,          -- email address is optional butmust be unique if present.
-    phone_number VARCHAR(10) NOT NULL CHECK (LENGTH(phone_number) = 10), -- 10-digit phone number.
+    email_address VARCHAR(150) UNIQUE,          -- email address is optional but must be unique if present.
+    phone_number VARCHAR(10) NOT NULL UNIQUE CHECK (LENGTH(phone_number) = 10), -- 10-digit phone number.
     hire_date DATE NOT NULL,                    -- date the employee was hired.
     role ENUM('Manager', 'Employee') NOT NULL,  -- employee role, either 'Manager' or 'Employee' (all take and make orders + deliver).
     wage DECIMAL(10, 2) NOT NULL CHECK (wage >= 0) -- hourly wage, must be non-negative.
