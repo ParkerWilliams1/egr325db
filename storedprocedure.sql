@@ -290,3 +290,39 @@ VALUES ('Jane Doe', 'janedoe@example.com', '12345ae567', '2024-12-05', 'Employee
 INSERT INTO Employee (employee_name, email_address, phone_number, hire_date, role, wage) 
 VALUES ('Alice Smith', 'alice@example.com', '1234!@#567', '2024-12-05', 'Manager', 20.00);
 */
+
+-- Stored procedure to add new employees
+DELIMITER //
+CREATE PROCEDURE AddNewEmployee (
+	IN newName VARCHAR(100),
+    IN newEmail VARCHAR(150),
+    IN newPhone VARCHAR(10),
+    IN hireDate DATE,
+    IN assignedRole ENUM('Manager', 'Employee'),
+    IN assignedWage DECIMAL(10, 2)
+)
+BEGIN
+	IF newEmail IS NULL THEN
+		INSERT INTO employee (employee_name, phone_number, hire_date, role, wage)
+        VALUES (newName, newPhone, hireDate, assignedRole, assignedWage);
+	ELSE
+		INSERT INTO employee (employee_name, email_address, phone_number, hire_date, role, wage)
+        VALUES (newName, newEmail, newPhone, hireDate, assignedRole, assignedWage);
+	END IF;
+END //
+
+DELIMITER ;
+
+-- Stored Procedure to schedule employees to shift
+DELIMITER //
+CREATE PROCEDURE AssignEmployeeToShift(
+	IN employeeID Int,
+    IN shiftDate DATE,
+    IN startTime TIME,
+    IN endTime TIME
+)
+BEGIN
+	INSERT INTO shift (shift_date, start_time, end_time, employee_id)
+    VALUES (shiftDate, startTime, endTime, employeeID);
+END //
+DELIMITER ;
